@@ -89,9 +89,9 @@ resource "aws_autoscaling_group" "jazira-webServer-asg" {
 }
 
 resource "aws_lb" "jazira-webServer-alb" {
-  name            = "jazira-webServer-alb"
-  security_groups = [aws_security_group.allow-http.id]
-  subnets         = [aws_subnet.jazira-webApp-public1-us-east-1a.id, aws_subnet.jazira-webApp-public2-us-east-1b.id]
+  name               = "jazira-webServer-alb"
+  security_groups    = [aws_security_group.allow-http.id]
+  subnets            = [aws_subnet.jazira-webApp-public1-us-east-1a.id, aws_subnet.jazira-webApp-public2-us-east-1b.id]
   load_balancer_type = "application"
 }
 
@@ -100,18 +100,44 @@ resource "aws_lb_target_group" "jazira-webServer-tg" {
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.jazira-webApp.id
-  
+
 }
 
 resource "aws_lb_listener" "jazira-webServer-listener" {
   load_balancer_arn = aws_lb.jazira-webServer-alb.arn
-  port = "80"
-  protocol = "HTTP"
+  port              = "80"
+  protocol          = "HTTP"
   default_action {
-    type = "forward"
+    type             = "forward"
     target_group_arn = aws_lb_target_group.jazira-webServer-tg.arn
   }
 }
 
+resource "aws_security_group" "jazira-bastionHost-sg" {
+  name   = "jazira-bastionHost-sg"
+  vpc_id = aws_vpc.jazira-webApp.id
+}
+
+resource "aws_vpc_security_group_egress_rule" "jazira-bastionHost-sg" {
+  security_group_id = aws_security_group.jazira-bastionHost-sg.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "jazira-bastionHost-sg" {
+  security_group_id = aws_security_group.jazira-bastionHost-sg.id
+  from_port         = 22
+  to_port           = 22
+  ip_protocol       = "tcp"
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+resource "aws_instance" "jazira-bastionHost" {
+  ami                    = data.aws_ami.amazon-linux.id
+  vpc_security_group_ids = [aws_security_group.jazira-bastionHost-sg.id]
+  key_name               = aws_key_pair.demo-key.key_name
+  instance_type          = "t2.micro"
+  subnet_id = aws_subnet.jazira-webApp-public1-us-east-1a.id
+}
 
 
