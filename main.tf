@@ -3,7 +3,7 @@ resource "aws_vpc" "jazira-webApp" {
 
 
   tags = {
-    Name = "my-vpc"
+    Name = "jazira-webApp"
   }
 }
 
@@ -11,7 +11,7 @@ resource "aws_internet_gateway" "jazira-webApp-igw" {
   vpc_id = aws_vpc.jazira-webApp.id
 
   tags = {
-    Name = "my-igw"
+    Name = "jazira-webApp-igw"
   }
 }
 
@@ -19,6 +19,8 @@ resource "aws_subnet" "jazira-webApp-public1-us-east-1a" {
   vpc_id            = aws_vpc.jazira-webApp.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = var.availability-zone-1a
+
+  map_public_ip_on_launch = true
 
   tags = {
     Name = "jazira-webApp-public1-us-east-1a"
@@ -29,7 +31,7 @@ resource "aws_subnet" "jazira-webApp-public2-us-east-1b" {
   vpc_id            = aws_vpc.jazira-webApp.id
   cidr_block        = "10.0.2.0/24"
   availability_zone = var.availability-zone-1b
-
+  map_public_ip_on_launch = true
   tags = {
     Name = "jazira-webApp-public2-us-east-1b"
   }
@@ -114,4 +116,20 @@ resource "aws_route_table_association" "private-route-table-assoc-1a" {
 resource "aws_route_table_association" "private-route-table-assoc-1b" {
   subnet_id      = aws_subnet.jazira-webApp-private2-us-east-1b.id
   route_table_id = aws_route_table.jazira-webApp-app-tier-private-rt.id
+}
+
+resource "aws_eip" "jazira-eip" {
+
+  tags = {
+    Name = "jazira-eip"
+  }
+}
+
+resource "aws_nat_gateway" "public-NAT-1" {
+  allocation_id = aws_eip.jazira-eip.id
+  subnet_id     = aws_subnet.jazira-webApp-public1-us-east-1a.id
+
+  tags = {
+    Name = "public-NAT-1"
+  }
 }
