@@ -28,9 +28,9 @@ resource "aws_subnet" "jazira-webApp-public1-us-east-1a" {
 }
 
 resource "aws_subnet" "jazira-webApp-public2-us-east-1b" {
-  vpc_id            = aws_vpc.jazira-webApp.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = var.availability-zone-1b
+  vpc_id                  = aws_vpc.jazira-webApp.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = var.availability-zone-1b
   map_public_ip_on_launch = true
   tags = {
     Name = "jazira-webApp-public2-us-east-1b"

@@ -73,6 +73,31 @@ resource "aws_launch_template" "jazira-webServer-template" {
   user_data = filebase64("scripts/user_data.sh")
 }
 
+resource "aws_lb_target_group" "jazira-webServer-tg" {
+  name     = "jazira-webServer-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.jazira-webApp.id
+  
+}
+
+resource "aws_lb" "jazira-webServer-alb" {
+  name            = "jazira-webServer-alb"
+  security_groups = [aws_security_group.allow-http.id]
+  subnets         = [aws_subnet.jazira-webApp-public1-us-east-1a.id, aws_subnet.jazira-webApp-public2-us-east-1b.id]
+  load_balancer_type = "application"
+}
+
+resource "aws_lb_listener" "jazira-webServer-listener" {
+  load_balancer_arn = aws_lb.jazira-webServer-alb.arn
+  port = "80"
+  protocol = "HTTP"
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.jazira-webServer-tg.arn
+  }
+}
+
 resource "aws_autoscaling_group" "jazira-webServer-asg" {
   name                = "jazira-webServer-asg"
   vpc_zone_identifier = [aws_subnet.jazira-webApp-public1-us-east-1a.id, aws_subnet.jazira-webApp-public2-us-east-1b.id]
@@ -80,12 +105,11 @@ resource "aws_autoscaling_group" "jazira-webServer-asg" {
   min_size            = 2
   desired_capacity    = 2
 
-
+  target_group_arns = [aws_lb_target_group.jazira-webServer-tg.arn]
   launch_template {
     id      = aws_launch_template.jazira-webServer-template.id
     version = "$Latest"
   }
 
 }
-
 
