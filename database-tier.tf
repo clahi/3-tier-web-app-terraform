@@ -13,7 +13,7 @@ resource "aws_vpc_security_group_ingress_rule" "jazira-db-sg" {
   from_port         = 3306
   to_port           = 3306
   ip_protocol       = "tcp"
-  cidr_ipv4         = "0.0.0.0/0"
+  referenced_security_group_id = aws_security_group.jazira-appServer-sg.id
 }
 
 resource "aws_vpc_security_group_egress_rule" "jazira-db-sg" {
