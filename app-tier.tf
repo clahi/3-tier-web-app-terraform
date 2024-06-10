@@ -30,6 +30,13 @@ resource "aws_vpc_security_group_ingress_rule" "allow-ssh-from-bastionHost" {
   to_port                      = 22
 }
 
+resource "aws_vpc_security_group_ingress_rule" "allow-access-from-database" {
+  security_group_id = aws_security_group.jazira-appServer-sg.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "tcp"
+  from_port         = 3306
+  to_port           = 3306
+}
 
 resource "aws_launch_template" "jazira-appServer-template" {
   name                   = "jazira-appServer-template"

@@ -137,7 +137,7 @@ resource "aws_instance" "jazira-bastionHost" {
   vpc_security_group_ids = [aws_security_group.jazira-bastionHost-sg.id]
   key_name               = aws_key_pair.demo-key.key_name
   instance_type          = "t2.micro"
-  subnet_id = aws_subnet.jazira-webApp-public1-us-east-1a.id
+  subnet_id              = aws_subnet.jazira-webApp-public1-us-east-1a.id
 }
 
 
